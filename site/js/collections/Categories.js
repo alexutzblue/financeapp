@@ -3,9 +3,9 @@ App = App || {
     Views: {},
     Router: {},
     Collections: {}
-  };
+};
 
 App.Collections.Categories = Backbone.Collection.extend({
-	url: '/api/categories',
-	model: App.Models.Category
+    url: '/api/categories',
+    model: App.Models.Category
 });
