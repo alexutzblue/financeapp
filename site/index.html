@@ -16,14 +16,14 @@
 <ul class="side-nav fixed collapsible" data-collapsible="accordion">
     <li><a href="/" class="bold">Financial app</a></li>
     <div class="divider"></div>
-    <li><a href="#" class="waves-effect">Dashboard</a></li>
+    <li><a href="/" class="waves-effect">Dashboard</a></li>
     <li><a href="#" class="waves-effect collapsible-header">Transactions</a>
         <ul class="collapsible-body">
             <li><a href="/incomes">Incomes</a></li>
             <li><a href="/expenses">Expenses</a></li>
         </ul>
     </li>
-    <li><a href="#" class="waves-effect collapsible-header">Stats</a>
+    <li><a href="/stats" class="waves-effect collapsible-header">Stats</a>
         <ul class="collapsible-body">
             <li><a href="#">Incomes</a></li>
             <li><a href="#">Expenses</a></li>
@@ -33,13 +33,14 @@
 <main>
     <div class="container">
         <div class="row">
-            <div class="col m12 s12 l12">
-                <div class="col s12 m2">
-                    <div class="card-panel teal">
-                        <span id="buget" class="white-text">Buget:<span></span></span>
-                    </div>
+            <div class="col s12 m2">
+                <div class="card-panel teal">
+                    <span id="buget" class="white-text">Buget:<span></span></span>
                 </div>
-
+            </div>
+        </div>
+        <div class="row">
+            <div class="col s12 m8 l8">
                 <div id="transactions" class="collection">
 
                 </div>
@@ -72,7 +73,7 @@
 
 <script type="text/template" id="entry-template">
 
-    <div class="row">
+    <div class="row no-margin">
         <div class="col s5">
             <p class="collections-title">
                 <b>Name: </b><span id="name"><%= name %></span>
@@ -82,26 +83,30 @@
             </p>
         </div>
         <div class="col s4">
-            <span class="task-cat teal" id="category"><%= category %></span>
-            <b>Date:</b><span id="date"><%= date %></span>
+            <p class="collections-title">
+                <span class="task-cat teal" id="category"><%= category %></span>
+                <b>Date:</b><span id="date"><%= date %></span>
+            </p>
         </div>
         <div class="col s3">
-            <a href="#" class="waves-effect btn-small btn-flat right">
-                <span class="badge">
-                    <i id="delete" class="material-icons" data-type="<%= type %>">close</i>
-                </span>
-            </a>
-            <a href="#" class="waves-effect btn-small btn-flat right">
-                <span class="badge">
-                    <i id="edit" class="material-icons right">edit</i>
-                </span>
-            </a>
+            <p class="collections-title">
+                <a href="#" class="waves-effect btn-small btn-flat right">
+                    <span class="badge">
+                        <i id="delete" class="material-icons" data-type="<%= type %>">close</i>
+                    </span>
+                </a>
+                <a href="#" class="waves-effect btn-small btn-flat right">
+                    <span class="badge">
+                        <i id="edit" class="material-icons right">edit</i>
+                    </span>
+                </a>
+            </p>
         </div>
     </div>
 </script>
 
 <script type="text/template" id="modal-template">
-    <div id="modal" class='modal col m4 l4'>
+    <div id="modal" class='modal col m4 l4 center-align'>
         <div class="modal-content">
             <% if(type=="edit") { %>
             <h4>Edit</h4>
@@ -109,21 +114,21 @@
             <h4>Add new <%= type %></h4>
             <% } %>
             <div class="row">
-                <div class="input-field col s12 m4">
+                <div class="input-field col s12 m12">
                     <input type="text" placeholder="default entry" name="name" id="name"/>
                     <label class="active" for="name">Name:</label>
                 </div>
             </div>
 
             <div class="row">
-                <div class="input-field col s12 m4">
+                <div class="input-field col s12 m12">
                     <input type="text" placeholder="default entry" name="value" id="value"/>
                     <label class="active" for="value">Value:</label>
                 </div>
             </div>
 
             <div class="row">
-                <div class="input-field col s12 m4">
+                <div class="input-field col s12 m12">
                     <select id="category" name="category">
                         <% for(var i in categories) { %>
                         <option name="<%= categories[i].get('name') %>"><%= categories[i].get('name') %></option>
@@ -134,7 +139,7 @@
             </div>
 
             <div class="row">
-                <div class="input-field col s12 m4">
+                <div class="input-field col s12 m12">
                     <input type="date" class="datepicker" name="date" id="date"/>
                     <label class="active" for="date">Date:</label>
                 </div>

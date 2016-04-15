@@ -25,7 +25,14 @@ label {
   font-weight: 300;
   box-sizing: border-box;
   line-height: inherit;
-  min-width: 3rem;
   padding: 3px 5px;
   text-align: center;
+}
+.modal {
+    max-height: none;
+    width:30%;
+    overflow:-y: hidden;
+}
+.no-margin {
+    margin: 0;
 }

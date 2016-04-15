@@ -50,11 +50,16 @@ App.Views.Entry = Backbone.View.extend({
         $('input[name="value"]').val(this.model.get('value'));
         $('select[name="category"]').val(this.model.get('category'));
         $('input[name="date"]').val(this.model.get('date'));
-        $('#modal').openModal();
+        $('#modal').openModal({
+            complete: function(){
+                $('#modal').remove();
+            }
+        });
         $('select#category').material_select();
         $('.datepicker').pickadate({
             selectMonths: true,
-            selectYears: 15
+            selectYears: 15,
+            container: 'main'
         });
         $('#editEntry').click({model: this.model}, this.updateEntry);
     },
