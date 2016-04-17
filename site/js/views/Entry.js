@@ -28,14 +28,12 @@ App.Views.Entry = Backbone.View.extend({
         return this;
     },
     remove: function () {
-        var entryView = this;
-        console.log(this);
+        var _this = this;
         $('#delete-modal').openModal();
-        if( 1 == 0) {
-            entryView.model.destroy();
-            entryView.$el.remove();
-            return entryView;
-        }
+        $('#delete-modal #yesBtn').click(function(){
+            _this.model.destroy();
+            _this.$el.remove();
+        });
     },
     showEditModal: function (event) {
         var modal = _.template($('#modal-template').html());

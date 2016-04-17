@@ -13,6 +13,7 @@ var router = new (App.Router.AppRouter = Backbone.Router.extend({
         "incomes": "getIncomes",
         "expenses": "getExpenses",
         "stats": "showStats",
+        "category/:category": "showCategory",
         "": "index"
     },
     initialize: function () {
@@ -28,7 +29,12 @@ var router = new (App.Router.AppRouter = Backbone.Router.extend({
         appView = new App.Views.AppView({el: "main"});
     },
     index: function () {
-        entriesList.transactions.fetch();
+        entriesList.transactions.fetch({
+            success: function(colllection,response,options) {
+                $('.tooltipped').tooltip({delay:50});
+            }
+        });
+
     },
     getIncomes: function () {
         entriesList.$el.html('');
@@ -43,6 +49,15 @@ var router = new (App.Router.AppRouter = Backbone.Router.extend({
         entriesList.$el.html('');
         entriesList.transactions.each(function (model) {
             if (model.get('type') == 2) {
+                var view = new App.Views.Entry({model: model});
+                entriesList.$el.append(view.render().el);
+            }
+        });
+    },
+    showCategory: function(category) {
+        entriesList.$el.html('');
+        entriesList.transactions.each(function(model) {
+            if(model.get('category') == category) {
                 var view = new App.Views.Entry({model: model});
                 entriesList.$el.append(view.render().el);
             }
