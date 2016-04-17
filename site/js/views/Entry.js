@@ -29,6 +29,7 @@ App.Views.Entry = Backbone.View.extend({
     },
     remove: function () {
         var entryView = this;
+        console.log(this);
         $('#delete-modal').openModal();
         if( 1 == 0) {
             entryView.model.destroy();
