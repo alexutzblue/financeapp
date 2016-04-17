@@ -10,8 +10,8 @@ var port = 4711;
 var connection = mysql.createConnection({
     port: 3306,
     host: 'localhost',
-    user: 'admin',
-    password: 'admin',
+    user: 'root',
+    password: '',
     database: 'node'
 });
 connection.connect();
@@ -35,14 +35,8 @@ app.get('/api', function (request, response) {
     response.send('Library API is running');
 });
 
-app.get('/api/incomes', function (request, response) {
-    connection.query('SELECT * FROM transactions where type = "1"', function (error, result) {
-        response.send(result);
-    });
-});
-
-app.get('/api/expenses', function (request, response) {
-    connection.query('SELECT * FROM transactions where type = "2"', function (error, result) {
+app.get('/api/transactions', function (request, response) {
+    connection.query('SELECT * FROM transactions', function (error, result) {
         response.send(result);
     });
 });
@@ -56,12 +50,12 @@ app.get('/api/categories', function (request, response) {
     });
 });
 
-app.post('/api/incomes', function (request, response) {
+app.post('/api/transactions', function (request, response) {
     connection.query('insert into transactions (name,value,category,type,added) values (?,?,?,?,?)',
             [request.body.name,
                 request.body.value,
                 request.body.category,
-                '1',
+                request.body.type,
                 request.body.date],
             function (error, result) {
                 if (error) {
@@ -71,22 +65,8 @@ app.post('/api/incomes', function (request, response) {
             });
 });
 
-app.post('/api/expenses', function (request, response) {
-    connection.query('insert into transactions (name,value,category,type,added) values (?,?,?,?,?)',
-            [request.body.name,
-                request.body.value,
-                request.body.category,
-                '2',
-                request.body.date],
-            function (error, result) {
-                if (error) {
-                    response.status(500).send({error: 'Something failed!'});
-                }
-                response.send();
-            });
-});
 
-app.delete('/api/incomes/:id', function (request, response) {
+app.delete('/api/transactions/:id', function (request, response) {
     connection.query('delete from transactions where id = ?', [request.params.id],
             function (error, result) {
                 if (error) {
@@ -96,17 +76,8 @@ app.delete('/api/incomes/:id', function (request, response) {
             });
 });
 
-app.delete('/api/expenses/:id', function (request, response) {
-    connection.query('delete from transactions where id = ?', [request.params.id],
-            function (error, result) {
-                if (error) {
-                    response.status(500).send({error: 'Something failed!'});
-                }
-                response.status(200).send();
-            });
-});
 
-app.put('/api/incomes/:id', function (request, response) {
+app.put('/api/transactions/:id', function (request, response) {
     connection.query('update transactions set name = ?, value = ?, category = ?, added = ? where id = ?',
             [request.body.name,
                 request.body.value,
@@ -121,19 +92,5 @@ app.put('/api/incomes/:id', function (request, response) {
     });
 });
 
-app.put('/api/expenses/:id', function (request, response) {
-    connection.query('update transactions set name = ?, value = ?, category = ?, added = ? where id = ?',
-            [request.body.name,
-                request.body.value,
-                request.body.category,
-                request.body.date,
-                request.params.id
-            ], function (error, result) {
-        if (error) {
-            response.status(500).send({error: 'Something failed!'});
-        }
-        response.send();
-    });
-});
 
 

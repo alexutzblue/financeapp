@@ -8,25 +8,10 @@ App = App || {
 //ENTRIES LIST VIEW
 App.Views.EntriesList = Backbone.View.extend({
     initialize: function () {
-        var _thisView = this;
         this.budget = 0;
-        this.incomesCollection = new App.Collections.Incomes();
-        this.expensesCollection = new App.Collections.Expenses();
-        this.incomesCollection.fetch({success: function (collection) {
-                collection.each(function (model) {
-                    _thisView.budget = _thisView.budget + Number(model.get('value'));
-                });
-            }});
-        this.expensesCollection.fetch({success: function (collection) {
-                collection.each(function (model) {
-                    _thisView.budget = _thisView.budget - Number(model.get('value'));
-                });
-                $('#budget span').html(_thisView.budget);
-            }});
-        this.incomesCollection.on("add", this.addOne, this);
-        this.expensesCollection.on("add", this.addOne, this);
-        this.incomesCollection.on("destroy", this.getBudget, this);
-        this.expensesCollection.on("destroy", this.getBudget, this);
+        this.transactions = new App.Collections.Transactions();
+        this.transactions.on("add", this.addOne, this);
+        this.transactions.on("destroy", this.getBudget, this);
     },
     events: {
     },
@@ -36,21 +21,20 @@ App.Views.EntriesList = Backbone.View.extend({
         if (date) {
             model.set('date', date);
         }
-        if (type == '1') {
-            var view = new App.Views.Income({model: model});
-        } else {
-            var view = new App.Views.Expense({model: model});
+        if (type == 1) {
+            model.set('className','income');
+            var view = new App.Views.Entry({model: model});
+        } else if(type == 2){
+            model.set('className','expense');
+            var view = new App.Views.Entry({model: model});
         }
         this.$el.append(view.render().el);
     },
     getBudget: function () {
         this.budget = 0;
         var _thisView = this;
-        this.incomesCollection.each(function (model) {
+        this.transactions.each(function (model) {
             _thisView.budget = _thisView.budget + Number(model.get('value'));
-        });
-        this.expensesCollection.each(function (model) {
-            _thisView.budget = _thisView.budget - Number(model.get('value'));
         });
         return this.budget;
     }

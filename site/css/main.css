@@ -1,0 +1,38 @@
+.income {
+  background: #7fff7f !important;
+}
+.expense{
+  background: #ff7f7f !important;
+}
+.edit {
+  color: black;
+  height: 20px;
+  opacity: .3;
+  width: 20px;
+  cursor: pointer;
+  line-height: 20px !important;
+  }
+
+label {
+  font-weight: bold;
+  margin:0 5px 0 10px;
+}
+.task-cat {
+  background-color: #26a69a;
+  border-radius: 2px;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 300;
+  box-sizing: border-box;
+  line-height: inherit;
+  padding: 3px 5px;
+  text-align: center;
+}
+.modal {
+    max-height: none;
+    width:30%;
+    overflow:-y: hidden;
+}
+.no-margin {
+    margin: 0;
+}
