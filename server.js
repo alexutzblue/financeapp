@@ -8,7 +8,7 @@ var app = express();
 var port = 4711;
 
 var connection = mysql.createConnection({
-    port: 3307,
+    port: 3306,
     host: 'localhost',
     user: 'admin',
     password: 'admin',
