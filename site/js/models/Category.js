@@ -8,6 +8,7 @@ App = App || {
 App.Models.Category = Backbone.Model.extend({
 	defaults: {
 		name: 'default category',
-		type: 1
+		type: 1,
+        color: ''
 	}
 });

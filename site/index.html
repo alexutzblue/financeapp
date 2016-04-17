@@ -66,14 +66,14 @@
     </div>
     <div class="modal-footer">
         <a href="#" class="modal-action modal-close waves-effect waves-red btn-flat">No</a>
-        <a href="#" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a>
+        <a id="yesBtn" href="#" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a>
     </div>
 </div>
 
 
 <script type="text/template" id="entry-template">
 
-    <div class="row no-margin">
+    <div class="row no-margin <%= className %>">
         <div class="col s5">
             <p class="collections-title">
                 <b>Name: </b><span id="name"><%= name %></span>
@@ -84,19 +84,19 @@
         </div>
         <div class="col s4">
             <p class="collections-title">
-                <span class="task-cat teal" id="category"><%= category %></span>
+                <span class="task-cat <%= categoryColor %>" id="category"><a href="/category/<%= category %>"><%= category %></a></span>
                 <b>Date:</b><span id="date"><%= date %></span>
             </p>
         </div>
         <div class="col s3">
             <p class="collections-title">
                 <a href="#" class="waves-effect btn-small btn-flat right">
-                    <span class="badge">
+                    <span class="badge tooltipped"  data-position="top" data-tooltip="Delete" data-delay="50">
                         <i id="delete" class="material-icons" data-type="<%= type %>">close</i>
                     </span>
                 </a>
                 <a href="#" class="waves-effect btn-small btn-flat right">
-                    <span class="badge">
+                    <span class="badge tooltipped" data-position="top" data-tooltip="Edit" data-delay="50">
                         <i id="edit" class="material-icons right">edit</i>
                     </span>
                 </a>
