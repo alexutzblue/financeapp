@@ -31,6 +31,11 @@ var router = new (App.Router.AppRouter = Backbone.Router.extend({
     index: function () {
         entriesList.transactions.fetch({
             success: function(colllection,response,options) {
+                entriesList.$el.html('');
+                entriesList.transactions.each(function (model) {
+                    var view = new App.Views.Entry({model: model});
+                    entriesList.$el.append(view.render().el);
+                });
                 $('.tooltipped').tooltip({delay:50});
             }
         });

@@ -13,6 +13,7 @@ App.Models.Entry = Backbone.Model.extend({
         name: "standard entry",
         value: "0",
         category: "default category",
+        categoryColor: '',
         date: ''
     }
 });

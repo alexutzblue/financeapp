@@ -36,7 +36,7 @@ app.get('/api', function (request, response) {
 });
 
 app.get('/api/transactions', function (request, response) {
-    connection.query('SELECT * FROM transactions', function (error, result) {
+    connection.query('SELECT transactions.*, categories.color as categoryColor FROM transactions INNER JOIN categories ON transactions.category = categories.name', function (error, result) {
         response.send(result);
     });
 });

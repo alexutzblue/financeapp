@@ -36,3 +36,6 @@ label {
 .no-margin {
     margin: 0;
 }
+.task-cat a {
+  color: #fff;
+}
