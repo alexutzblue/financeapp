@@ -50,6 +50,19 @@ app.get('/api/categories', function (request, response) {
     });
 });
 
+app.post('/api/categories',function(request,response) {
+   connection.query('insert into categories (name,type,color) values(?, ?, ?)',
+        [request.body.name,
+        request.body.type,
+        request.body.color],
+        function(error,result) {
+            if(error) {
+                response.status(500).send({error: 'Something failed!'});
+            }
+            response.send();
+        });
+});
+
 app.post('/api/transactions', function (request, response) {
     connection.query('insert into transactions (name,value,category,type,added) values (?,?,?,?,?)',
             [request.body.name,

@@ -16,29 +16,44 @@ App.Views.AppView = Backbone.View.extend({
     events: {
         "click #showIncomeModal": "showModal",
         "click #showExpenseModal": "showModal",
+        "click #showCategoryModal" : "showModal",
         "click #addIncome": "addEntry",
-        "click #addExpense": "addEntry"
+        "click #addExpense": "addEntry",
+        "click #addCategory": "addNewCategory"
     },
     showModal: function (event) {
-        var modal = _.template($('#modal-template').html());
-        if (event.currentTarget.id == 'showIncomeModal') {
-            var incomeCategories = categories.where({type: 1});
-            this.$el.append(modal({type: 'income', categories: incomeCategories}));
-        } else {
-            var expensesCategories = categories.where({type: 2});
-            this.$el.append(modal({type: 'expense', categories: expensesCategories}));
-        }
-        $('#modal').openModal({
-            complete: function(){
-                $('#modal').remove();
+        var modal;
+        if(event.currentTarget.id == "showCategoryModal") {
+            modal = _.template($('#category-modal').html());
+            this.$el.append(modal());
+            $('#category-modal').openModal({
+               complete: function(){
+                   $('#category-modal').remove();
+               }
+            });
+            $('select#category-type, select#color').material_select();
+        }else {
+            modal = _.template($('#modal-template').html());
+            if (event.currentTarget.id == 'showIncomeModal') {
+                var incomeCategories = categories.where({type: 1});
+                this.$el.append(modal({type: 'income', categories: incomeCategories}));
+            } else {
+                var expensesCategories = categories.where({type: 2});
+                this.$el.append(modal({type: 'expense', categories: expensesCategories}));
             }
-        });
-        $('select#category').material_select();
-        $('.datepicker').pickadate({
-            selectMonths: true,
-            selectYears: 15,
-            container: 'main'
-        });
+            $('#modal').openModal({
+                complete: function () {
+                    $('#modal').remove();
+                }
+            });
+            $('select#category').material_select();
+            $('.datepicker').pickadate({
+                selectMonths: true,
+                selectYears: 15,
+                container: 'main',
+                format: 'dd-mm-yyyy'
+            });
+        }
     },
     addEntry: function (event) {
         var name = $('#modal input#name').val();
@@ -53,5 +68,16 @@ App.Views.AppView = Backbone.View.extend({
         entriesList.transactions.add(model);
         this.budget.html(entriesList.getBudget());
         model.save();
+    },
+    addNewCategory: function(){
+        var name,type,color,categoryModel;
+        name = $('#category-modal input#category').val();
+        type = $('#category-modal select#category-type').val();
+        color = $('#category-modal select#color').val();
+        console.log(type);
+        categoryModel = new App.Models.Category({name: name, type: type, color: color});
+        categories.add(categoryModel);
+        categoryModel.save();
+        categories.fetch();
     }
 });
