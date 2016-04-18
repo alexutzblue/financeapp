@@ -20,7 +20,6 @@ App.Views.Entry = Backbone.View.extend({
     },
     render: function (event) {
         var attributes = this.model.toJSON();
-        //this.el = this.template(attributes);
         this.$el.html(this.template(attributes));
         if (event) {
             this.model.save();
