@@ -26,45 +26,55 @@ var router = new (App.Router.AppRouter = Backbone.Router.extend({
                 Backbone.history.navigate(href.attr, true);
             }
         });
-        appView = new App.Views.AppView({el: "main"});
+        $(".button-collapse").sideNav();
+        appView = new App.Views.AppView({el: "main > .container"});
     },
     index: function () {
         entriesList.transactions.fetch({
-            success: function(colllection,response,options) {
-                entriesList.$el.html('');
-                entriesList.transactions.each(function (model) {
+            success: function () {
+                var i = 0;
+                entriesList.$el.find('tbody').html('');
+                entriesList.$el.find('#table-title').html('Last 10 transactions');
+                entriesList.transactions.some(function (model) {
+                    i++;
                     var view = new App.Views.Entry({model: model});
-                    entriesList.$el.append(view.render().el);
+                    entriesList.$el.find('#transactions-wrapper tbody').append(view.render().el);
+                    if (i == 10) return true;
                 });
-                $('.tooltipped').tooltip({delay:50});
+                if (appView.$el.find('canvas#expensesPerDay').attr('id') != 'expensesPerDay') {
+                    appView.makeExpensesByDayChart();
+                }
+                $('.tooltipped').tooltip({delay: 50});
             }
         });
-
     },
     getIncomes: function () {
-        entriesList.$el.html('');
+        entriesList.$el.find('tbody').html('');
+        entriesList.$el.find('#table-title').html('Incomes');
         entriesList.transactions.each(function (model) {
-            if (model.get('type') == 1) {
+            if (model.get('type') == INCOME) {
                 var view = new App.Views.Entry({model: model});
-                entriesList.$el.append(view.render().el);
+                entriesList.$el.find('#transactions-wrapper tbody').append(view.render().el);
             }
         });
     },
     getExpenses: function () {
-        entriesList.$el.html('');
+        entriesList.$el.find('tbody').html('');
+        entriesList.$el.find('#table-title').html('Expenses');
         entriesList.transactions.each(function (model) {
-            if (model.get('type') == 2) {
+            if (model.get('type') == EXPENSE) {
                 var view = new App.Views.Entry({model: model});
-                entriesList.$el.append(view.render().el);
+                entriesList.$el.find('#transactions-wrapper tbody').append(view.render().el);
             }
         });
     },
-    showCategory: function(category) {
-        entriesList.$el.html('');
-        entriesList.transactions.each(function(model) {
-            if(model.get('category') == category) {
+    showCategory: function (category) {
+        entriesList.$el.find('tbody').html('');
+        entriesList.$el.find('#table-title').html('Category: ' + category);
+        entriesList.transactions.each(function (model) {
+            if (model.get('category') == category) {
                 var view = new App.Views.Entry({model: model});
-                entriesList.$el.append(view.render().el);
+                entriesList.$el.find('#transactions-wrapper tbody').append(view.render().el);
             }
         });
     },
@@ -87,92 +97,62 @@ var router = new (App.Router.AppRouter = Backbone.Router.extend({
         });
     },
     showStats: function () {
-        entriesList.$el.html('');
-        var data = [];
-        var incomeCategories = {}, expenseCategories = {}, i = 0, j = 0;
+        appView.$el.html('');
+        appView.$el.append('<div class="card"><div class="card-title"></div><div class="card-content"></div></div>');
+        var incomeCategories = {}, expenseCategories = {}, i = 0;
         entriesList.transactions.each(function (model) {
             var category = model.get('category');
             var value = model.get('value');
             if (model.get('type') == INCOME) {
                 if (!incomeCategories.hasOwnProperty(category)) {
-                    incomeCategories[category] = 0;
-                    incomeCategories[category] += parseInt(value);
+                    incomeCategories[category] = {};
+                    incomeCategories[category]['value'] = 0;
+                    incomeCategories[category]['color'] = model.get('categoryColor');
+                    incomeCategories[category]['value'] += parseInt(value);
                 } else {
-                    incomeCategories[category] += parseInt(value);
+                    incomeCategories[category]['value'] += parseInt(value);
                 }
             } else if (model.get('type') == EXPENSE) {
                 if (!expenseCategories.hasOwnProperty(category)) {
-                    expenseCategories[category] = 0;
-                    expenseCategories[category] += parseInt(value);
+                    expenseCategories[category] = {};
+                    expenseCategories[category]['value'] = 0;
+                    expenseCategories[category]['color'] = model.get('categoryColor');
+                    expenseCategories[category]['value'] += parseInt(value);
                 } else {
-                    expenseCategories[category] += parseInt(value);
+                    expenseCategories[category]['value'] += parseInt(value);
                 }
             }
         });
-        entriesList.$el.append('<label for="incomeChart">Incomes<br/><canvas id="incomeChart" wdith="400" height="400"></canvas></label>');
-        entriesList.$el.append('<label for="expenseChart">Expenses<br/><canvas id="expenseChart" wdith="400" height="400"></canvas></label>');
-        entriesList.$el.append('<canvas id="radar" width="400" height="400"></canvas>');
-        var incomeCtx = $('#incomeChart').get(0).getContext("2d");
-        var expenseCtx = $('#expenseChart').get(0).getContext("2d");
-        var radarCtx = $('#radar').get(0).getContext("2d");
+        var incomesChart = new App.Views.Chart({model: charts['incomes']});
+        var expensesChart = new App.Views.Chart({model: charts['expenses']});
+        appView.$el.find('.card:first > .card-content').append(incomesChart.render());
+        appView.$el.find('.card:first > .card-content').append(expensesChart.render());
+        var incomeCtx = $('#' + incomesChart.model.get('canvasId')).get(0).getContext("2d");
+        var expenseCtx = $('#' + expensesChart.model.get('canvasId')).get(0).getContext("2d");
         var incomeData = {}, expenseData = {};
-        var pallette = ['blue', 'green', 'red', 'purple', 'pink', 'orange'];
-        var colorPallette = pallette[Math.floor(Math.random() * 5) + 1];
-        var incomeData
+
         $.map(incomeCategories, function (value, key) {
             incomeData[i] = {
-                value: value,
-                color: getRandomColor(colorPallette),
+                value: value['value'],
+                color: value['color'],
                 label: key
             };
 
             i++;
         });
-        colorPallette = pallette[Math.floor(Math.random() * 5) + 1];
         $.map(expenseCategories, function (value, key) {
             expenseData[i] = {
-                value: value,
-                color: getRandomColor(colorPallette),
+                value: value['value'],
+                color: value['color'],
                 label: key
             };
             i++;
         });
-        var data = {
-            labels: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "Novomber", "December"],
-            datasets: [
-                {
-                    label: "My First dataset",
-                    fillColor: "rgba(220,220,220,0.2)",
-                    strokeColor: "rgba(220,220,220,1)",
-                    pointColor: "rgba(220,220,220,1)",
-                    pointStrokeColor: "#fff",
-                    pointHighlightFill: "#fff",
-                    pointHighlightStroke: "rgba(220,220,220,1)",
-                    data: [65, 59, 90, 81, 56, 55, 40,25,23,51,52,65]
-                },
-                {
-                    label: "My Second dataset",
-                    fillColor: "rgba(151,187,205,0.2)",
-                    strokeColor: "rgba(151,187,205,1)",
-                    pointColor: "rgba(151,187,205,1)",
-                    pointStrokeColor: "#fff",
-                    pointHighlightFill: "#fff",
-                    pointHighlightStroke: "rgba(151,187,205,1)",
-                    data: [28, 48, 40, 19, 96, 27, 100]
-                }
-            ]
-        };
 
         var incomeChart = new Chart(incomeCtx).Doughnut(incomeData);
+        $('.' + incomesChart.model.get('legendClass')).html(incomeChart.generateLegend());
         var expenseChart = new Chart(expenseCtx).Pie(expenseData);
-        var radarChart = new Chart(radarCtx).Line(data);
     }
 }));
 
 Backbone.history.start();
-
-function getRandomColor(pallette) {
-    return randomColor({
-        luminosity: 'bright'
-    });
-}

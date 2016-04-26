@@ -7,8 +7,8 @@ var App = App || {
 
 // BASIC ENTRY VIEW
 App.Views.Entry = Backbone.View.extend({
-    tagName: "li",
-    className: "collection-item",
+    tagName: "tr",
+    className: "",
     events: {
         'click #delete': "remove",
         'click #edit': "showEditModal"
@@ -17,21 +17,28 @@ App.Views.Entry = Backbone.View.extend({
     initialize: function () {
         this.model.on('hide', this.remove, this);
         this.model.on("change", this.render, this);
+        $('#delete-modal #yesBtn').on("click",function(){
+            $(this).data('clicked',true);
+        });
     },
     render: function (event) {
         var attributes = this.model.toJSON();
         this.$el.html(this.template(attributes));
-        if (event) {
-            this.model.save();
-        }
         return this;
     },
     remove: function () {
         var _this = this;
-        $('#delete-modal').openModal();
-        $('#delete-modal #yesBtn').click(function(){
-            _this.model.destroy();
-            _this.$el.remove();
+        $('#delete-modal').openModal({
+            complete: function(){
+                if($('#delete-modal #yesBtn').data('clicked')) {
+                    _this.model.destroy();
+                    Materialize.toast("Entry has been deleted!",2000);
+                    _this.$el.remove();
+                    expenseChartView = new App.Views.Chart({model:charts['expenseGraph']});
+                    expenseChartView.model.trigger('change');
+                }
+                $('#delete-modal #yesBtn').data('clicked',false);
+            }
         });
     },
     showEditModal: function (event) {
@@ -44,10 +51,10 @@ App.Views.Entry = Backbone.View.extend({
             var categoriesList = categories.where({type: 2});
         }
         appView.$el.append(modal({type: 'edit', categories: categoriesList}));
-        $('input[name="name"]').val(this.model.get('name'));
-        $('input[name="value"]').val(this.model.get('value'));
-        $('select[name="category"]').val(this.model.get('category'));
-        $('input[name="date"]').val(this.model.get('date'));
+        $('input#name').val(this.model.get('name'));
+        $('input#value').val(this.model.get('value'));
+        $('select#category').val(this.model.get('category_id'));
+        $('input#date').val(this.model.get('date'));
         $('#modal').openModal({
             complete: function(){
                 $('#modal').remove();
@@ -62,10 +69,17 @@ App.Views.Entry = Backbone.View.extend({
         $('#editEntry').click({model: this.model}, this.updateEntry);
     },
     updateEntry: function (event) {
-        var name = $('input[name="name"]').val();
-        var value = $('input[name="value"]').val();
-        var category = $('select[name="category"]').val();
-        var date = $('input[name="date"]').val();
-        event.data.model.set({name: name, value: value, category: category, date: date});
+        var name = $('input#name').val();
+        var value = $('input#value').val();
+        var category_id = $('select#category').val();
+        var category_name = $('select#category option:selected').text();
+        category_name = category_name.trim().replace(/(\r\n|\n|\r)/gm,"");
+        var category = categories.where({name: category_name});
+        var color = _.where(colors,{id: category[0].get('color_id')});
+        var date = $('input#date').val();
+        event.data.model.set({name: name, value: value, category_id: category_id, categoryColor: color[0]['color_name'], category: category_name, date: date},{wait:true});
+        event.data.model.save();
+        expenseChartView = new App.Views.Chart({model:charts['expenseGraph']});
+        expenseChartView.model.trigger('change');
     }
 });

@@ -36,7 +36,24 @@ app.get('/api', function (request, response) {
 });
 
 app.get('/api/transactions', function (request, response) {
-    connection.query('SELECT transactions.*, categories.color as categoryColor FROM transactions INNER JOIN categories ON transactions.category = categories.name', function (error, result) {
+    connection.query('SELECT tr.id, tr.name, tr.value, tr.type, tr.category_id, tr.date, cat.name as category, col.color_name as categoryColor ' +
+        'FROM transactions as tr ' +
+        'LEFT JOIN categories as cat ON tr.category_id = cat.id ' +
+        'LEFT JOIN categories_colors as col ON cat.color_id = col.id',
+        function (error, result) {
+            if(error) {
+                response.status(500).send({error: error});
+            }
+            response.send(result);
+    });
+});
+
+app.get('/api/colors',function(request,response) {
+    connection.query('SELECT * from categories_colors',
+    function(error,result) {
+        if(error) {
+            response.status(500).send({error: 'Could not get the colors!'});
+        }
         response.send(result);
     });
 });
@@ -51,7 +68,7 @@ app.get('/api/categories', function (request, response) {
 });
 
 app.post('/api/categories',function(request,response) {
-   connection.query('insert into categories (name,type,color) values(?, ?, ?)',
+   connection.query('insert into categories (name,type,color_id) values(?, ?, ?)',
         [request.body.name,
         request.body.type,
         request.body.color],
@@ -64,10 +81,10 @@ app.post('/api/categories',function(request,response) {
 });
 
 app.post('/api/transactions', function (request, response) {
-    connection.query('insert into transactions (name,value,category,type,added) values (?,?,?,?,?)',
+    connection.query('insert into transactions (name,value,category_id,type,date) values (?,?,?,?,?)',
             [request.body.name,
                 request.body.value,
-                request.body.category,
+                request.body.category_id,
                 request.body.type,
                 request.body.date],
             function (error, result) {
@@ -91,10 +108,10 @@ app.delete('/api/transactions/:id', function (request, response) {
 
 
 app.put('/api/transactions/:id', function (request, response) {
-    connection.query('update transactions set name = ?, value = ?, category = ?, added = ? where id = ?',
+    connection.query('update transactions set name = ?, value = ?, category_id = ?, date = ? where id = ?',
             [request.body.name,
                 request.body.value,
-                request.body.category,
+                request.body.category_id,
                 request.body.date,
                 request.params.id
             ], function (error, result) {

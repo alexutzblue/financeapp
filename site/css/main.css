@@ -1,41 +1,90 @@
 .income {
-  background: #7fff7f !important;
+    /*background: #7fff7f !important;*/
 }
-.expense{
-  background: #ff7f7f !important;
+
+.expense {
+    /*background: #ff7f7f !important;*/
 }
+
 .edit {
-  color: black;
-  height: 20px;
-  opacity: .3;
-  width: 20px;
-  cursor: pointer;
-  line-height: 20px !important;
-  }
+    color: black;
+    height: 20px;
+    opacity: .3;
+    width: 20px;
+    cursor: pointer;
+    line-height: 20px !important;
+}
 
 label {
-  font-weight: bold;
-  margin:0 5px 0 10px;
+    font-weight: bold;
+    margin: 0 5px 0 10px;
 }
+
 .task-cat {
-  background-color: #26a69a;
-  border-radius: 2px;
-  color: #fff;
-  font-size: 0.8rem;
-  font-weight: 300;
-  box-sizing: border-box;
-  line-height: inherit;
-  padding: 3px 5px;
-  text-align: center;
+    background-color: #26a69a;
+    border-radius: 2px;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 300;
+    box-sizing: border-box;
+    line-height: inherit;
+    padding: 3px 5px;
+    text-align: center;
 }
+
 .modal {
     max-height: none;
-    width:30%;
-    overflow:-y: hidden;
+    width: 30%;
+    overflow: hidden;
 }
+header, main, footer {
+    padding-left: 240px;
+}
+
+@media only screen and (max-width : 992px) {
+    header, main, footer {
+        padding-left: 0;
+    }
+    .modal {
+        width: 80%;
+    }
+}
+.container {
+    width: 85%;
+}
+
 .no-margin {
     margin: 0;
 }
+
 .task-cat a {
-  color: #fff;
+    color: #fff;
+    font-weight: 500;
+}
+
+.margin-5 {
+    margin: 5px;
+}
+a.button-collapse.top-nav {
+    color: #fff;
+    float: none;
+    font-size: 36px;
+    height: 48px;
+    left: 7.5%;
+    margin-left: 1.5rem;
+    position: absolute;
+    text-align: center;
+    top: 0;
+    width: 48px;
+    z-index: 2;
+}
+#category-modal {
+    height:80vh;
+}
+
+.doughnut-legend li span {
+    display: inline-block;
+    height: 12px;
+    margin-right: 5px;
+    width: 12px;
 }

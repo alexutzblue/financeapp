@@ -28,7 +28,7 @@ App.Views.EntriesList = Backbone.View.extend({
             model.set('className','expense');
             var view = new App.Views.Entry({model: model});
         }
-        this.$el.append(view.render().el);
+        this.$el.find('#transactions-wrapper tbody').append(view.render().el);
     },
     getBudget: function () {
         this.budget = 0;

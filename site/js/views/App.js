@@ -1,38 +1,50 @@
 App = App || {
-    Models: {},
-    Views: {},
-    Router: {},
-    Collections: {}
-};
+        Models: {},
+        Views: {},
+        Router: {},
+        Collections: {}
+    };
 
 //APP VIEW
 App.Views.AppView = Backbone.View.extend({
     initialize: function () {
-        entriesList = new App.Views.EntriesList({el: '#transactions'});
+        entriesList = new App.Views.EntriesList({el: '#transactions .card-content'});
         categories = new App.Collections.Categories();
         categories.fetch();
         this.budget = $('h2#budget span');
+        colors = this.getCategoriesColors();
     },
     events: {
         "click #showIncomeModal": "showModal",
         "click #showExpenseModal": "showModal",
-        "click #showCategoryModal" : "showModal",
+        "click #showCategoryModal": "showModal",
         "click #addIncome": "addEntry",
         "click #addExpense": "addEntry",
         "click #addCategory": "addNewCategory"
     },
     showModal: function (event) {
         var modal;
-        if(event.currentTarget.id == "showCategoryModal") {
+        if (event.currentTarget.id == "showCategoryModal") {
             modal = _.template($('#category-modal').html());
             this.$el.append(modal());
             $('#category-modal').openModal({
-               complete: function(){
-                   $('#category-modal').remove();
-               }
+                complete: function () {
+                    $('#category-modal').remove();
+                }
             });
-            $('select#category-type, select#color').material_select();
-        }else {
+            $.ajax({
+                url: "api/colors",
+                type: "get",
+                complete: function (response) {
+                    if (response) {
+                        _.map(response.responseJSON, function (color) {
+                            $('select#color').append('<option value="' + color.id + '" data-color="' + color.color_name + '">' + color.color_name + '</option>');
+                        });
+                        $('select#category-type, select#color').material_select();
+                    }
+                }
+            });
+        } else {
             modal = _.template($('#modal-template').html());
             if (event.currentTarget.id == 'showIncomeModal') {
                 var incomeCategories = categories.where({type: 1});
@@ -51,33 +63,75 @@ App.Views.AppView = Backbone.View.extend({
                 selectMonths: true,
                 selectYears: 15,
                 container: 'main',
-                format: 'dd-mm-yyyy'
             });
         }
     },
     addEntry: function (event) {
         var name = $('#modal input#name').val();
         var value = $('#modal input#value').val();
-        var category = $('#modal select#category').val();
+        var category_id = $('#modal select#category').val();
         var date = $('#modal input#date').val();
+        var category_name = $('#modal select#category option:selected').text();
+        category_name = category_name.trim().replace(/(\r\n|\n|\r)/gm,"");
+        var category = categories.where({name: category_name});
+        var color = _.where(colors,{id: category[0].get('color_id')});
         if (event.currentTarget.id == 'addIncome') {
-            var model = new App.Models.Entry({className: 'income', name: name, value: value, category: category, type: 1, date: date});
+            var model = new App.Models.Entry({
+                className: 'income',
+                name: name,
+                value: value,
+                categoryColor: color[0]['color_name'],
+                category_id: category_id,
+                category: category_name,
+                type: 1,
+                date: date
+            });
         } else if (event.currentTarget.id == 'addExpense') {
-            var model = new App.Models.Entry({clasName: 'expense', name: name, value: value, category: category, type: 2, date: date});
+            var model = new App.Models.Entry({
+                clasName: 'expense',
+                name: name,
+                value: value,
+                categoryColor: color[0]['color_name'],
+                category_id: category_id,
+                category: category_name,
+                type: 2,
+                date: date
+            });
         }
         entriesList.transactions.add(model);
+        expenseChartView = new App.Views.Chart({model:charts['expenseGraph']});
+        expenseChartView.model.trigger('change');
         this.budget.html(entriesList.getBudget());
         model.save();
     },
-    addNewCategory: function(){
-        var name,type,color,categoryModel;
+    getCategoriesColors: function () {
+        var colors = null;
+        $.ajax({
+            async: false,
+            url: "api/colors",
+            type: "get",
+            success: function (response) {
+                if (response) {
+                    colors = response;
+                }
+            }
+        });
+        return colors;
+    },
+    addNewCategory: function () {
+        var name, type, color, categoryModel;
         name = $('#category-modal input#category').val();
         type = $('#category-modal select#category-type').val();
         color = $('#category-modal select#color').val();
-        console.log(type);
         categoryModel = new App.Models.Category({name: name, type: type, color: color});
         categories.add(categoryModel);
         categoryModel.save();
         categories.fetch();
+    },
+    makeExpensesByDayChart: function () {
+        var expenseGraphModel = charts['expenseGraph'];
+        var expenseGraphView = new App.Views.Chart({model: expenseGraphModel});
+        this.$el.find('#content #transactions').before(expenseGraphView.render());
+        expenseGraphView.createLineGraph(expenseGraphModel);
     }
 });
