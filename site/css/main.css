@@ -82,7 +82,7 @@ a.button-collapse.top-nav {
     height:80vh;
 }
 
-.doughnut-legend li span {
+.legend li span {
     display: inline-block;
     height: 12px;
     margin-right: 5px;

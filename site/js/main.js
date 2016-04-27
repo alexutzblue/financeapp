@@ -12,7 +12,8 @@ var router = new (App.Router.AppRouter = Backbone.Router.extend({
         "today": "getTodayTransactions",
         "incomes": "getIncomes",
         "expenses": "getExpenses",
-        "stats": "showStats",
+        "stats/incomes": "showIncomesStats",
+        "stats/expenses": "showExpensesStats",
         "category/:category": "showCategory",
         "": "index"
     },
@@ -33,12 +34,17 @@ var router = new (App.Router.AppRouter = Backbone.Router.extend({
         entriesList.transactions.fetch({
             success: function () {
                 var i = 0;
-                entriesList.$el.find('tbody').html('');
-                entriesList.$el.find('#table-title').html('Last 10 transactions');
+                if(!entriesList.$el.find('tbody').length) {
+                    appView.$el.find('#content').html('');
+                    var dashboardTemplate = _.template($('#dashboard-template').html());
+                    appView.$el.find('#content').html(dashboardTemplate());
+                }
+                appView.$el.find('tbody').html('');
+                appView.$el.find('#table-title').html('Last 10 transactions');
                 entriesList.transactions.some(function (model) {
                     i++;
                     var view = new App.Views.Entry({model: model});
-                    entriesList.$el.find('#transactions-wrapper tbody').append(view.render().el);
+                    appView.$el.find('#transactions-wrapper tbody').append(view.render().el);
                     if (i == 10) return true;
                 });
                 if (appView.$el.find('canvas#expensesPerDay').attr('id') != 'expensesPerDay') {
@@ -49,32 +55,32 @@ var router = new (App.Router.AppRouter = Backbone.Router.extend({
         });
     },
     getIncomes: function () {
-        entriesList.$el.find('tbody').html('');
-        entriesList.$el.find('#table-title').html('Incomes');
+        appView.$el.find('tbody').html('');
+        appView.$el.find('#table-title').html('Incomes');
         entriesList.transactions.each(function (model) {
             if (model.get('type') == INCOME) {
                 var view = new App.Views.Entry({model: model});
-                entriesList.$el.find('#transactions-wrapper tbody').append(view.render().el);
+                appView.$el.find('#transactions-wrapper tbody').append(view.render().el);
             }
         });
     },
     getExpenses: function () {
-        entriesList.$el.find('tbody').html('');
-        entriesList.$el.find('#table-title').html('Expenses');
+        appView.$el.find('tbody').html('');
+        appView.$el.find('#table-title').html('Expenses');
         entriesList.transactions.each(function (model) {
             if (model.get('type') == EXPENSE) {
                 var view = new App.Views.Entry({model: model});
-                entriesList.$el.find('#transactions-wrapper tbody').append(view.render().el);
+                appView.$el.find('#transactions-wrapper tbody').append(view.render().el);
             }
         });
     },
     showCategory: function (category) {
-        entriesList.$el.find('tbody').html('');
-        entriesList.$el.find('#table-title').html('Category: ' + category);
+        appView.$el.find('tbody').html('');
+        appView.$el.find('#table-title').html('Category: ' + category);
         entriesList.transactions.each(function (model) {
             if (model.get('category') == category) {
                 var view = new App.Views.Entry({model: model});
-                entriesList.$el.find('#transactions-wrapper tbody').append(view.render().el);
+                appView.$el.find('#transactions-wrapper tbody').append(view.render().el);
             }
         });
     },
@@ -96,62 +102,18 @@ var router = new (App.Router.AppRouter = Backbone.Router.extend({
             }
         });
     },
-    showStats: function () {
-        appView.$el.html('');
-        appView.$el.append('<div class="card"><div class="card-title"></div><div class="card-content"></div></div>');
-        var incomeCategories = {}, expenseCategories = {}, i = 0;
-        entriesList.transactions.each(function (model) {
-            var category = model.get('category');
-            var value = model.get('value');
-            if (model.get('type') == INCOME) {
-                if (!incomeCategories.hasOwnProperty(category)) {
-                    incomeCategories[category] = {};
-                    incomeCategories[category]['value'] = 0;
-                    incomeCategories[category]['color'] = model.get('categoryColor');
-                    incomeCategories[category]['value'] += parseInt(value);
-                } else {
-                    incomeCategories[category]['value'] += parseInt(value);
-                }
-            } else if (model.get('type') == EXPENSE) {
-                if (!expenseCategories.hasOwnProperty(category)) {
-                    expenseCategories[category] = {};
-                    expenseCategories[category]['value'] = 0;
-                    expenseCategories[category]['color'] = model.get('categoryColor');
-                    expenseCategories[category]['value'] += parseInt(value);
-                } else {
-                    expenseCategories[category]['value'] += parseInt(value);
-                }
-            }
-        });
+    showIncomesStats: function () {
         var incomesChart = new App.Views.Chart({model: charts['incomes']});
+        var content = incomesChart.render();
+        incomesChart.statsTemplateWrapper(content);
+        incomesChart.createIncomePieChart(charts['incomes']);
+    },
+    showExpensesStats: function() {
         var expensesChart = new App.Views.Chart({model: charts['expenses']});
-        appView.$el.find('.card:first > .card-content').append(incomesChart.render());
-        appView.$el.find('.card:first > .card-content').append(expensesChart.render());
-        var incomeCtx = $('#' + incomesChart.model.get('canvasId')).get(0).getContext("2d");
-        var expenseCtx = $('#' + expensesChart.model.get('canvasId')).get(0).getContext("2d");
-        var incomeData = {}, expenseData = {};
+        var content = expensesChart.render();
+        expensesChart.statsTemplateWrapper(content);
+        expensesChart.createExpensePieChart(charts['expenses']);
 
-        $.map(incomeCategories, function (value, key) {
-            incomeData[i] = {
-                value: value['value'],
-                color: value['color'],
-                label: key
-            };
-
-            i++;
-        });
-        $.map(expenseCategories, function (value, key) {
-            expenseData[i] = {
-                value: value['value'],
-                color: value['color'],
-                label: key
-            };
-            i++;
-        });
-
-        var incomeChart = new Chart(incomeCtx).Doughnut(incomeData);
-        $('.' + incomesChart.model.get('legendClass')).html(incomeChart.generateLegend());
-        var expenseChart = new Chart(expenseCtx).Pie(expenseData);
     }
 }));
 
