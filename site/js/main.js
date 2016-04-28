@@ -104,13 +104,13 @@ var router = new (App.Router.AppRouter = Backbone.Router.extend({
     },
     showIncomesStats: function () {
         var incomesChart = new App.Views.Chart({model: charts['incomes']});
-        var content = incomesChart.render();
+        var content = incomesChart.render(300,200);
         incomesChart.statsTemplateWrapper(content);
         incomesChart.createIncomePieChart(charts['incomes']);
     },
     showExpensesStats: function() {
         var expensesChart = new App.Views.Chart({model: charts['expenses']});
-        var content = expensesChart.render();
+        var content = expensesChart.render(300,200);
         expensesChart.statsTemplateWrapper(content);
         expensesChart.createExpensePieChart(charts['expenses']);
 

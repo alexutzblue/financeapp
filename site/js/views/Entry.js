@@ -77,6 +77,7 @@ App.Views.Entry = Backbone.View.extend({
         var category = categories.where({name: category_name});
         var color = _.where(colors,{id: category[0].get('color_id')});
         var date = $('input#date').val();
+        console.log(event.data.model.preValidate({name: name, value: value}));
         event.data.model.set({name: name, value: value, category_id: category_id, categoryColor: color[0]['color_name'], category: category_name, date: date},{wait:true});
         event.data.model.save();
         expenseChartView = new App.Views.Chart({model:charts['expenseGraph']});

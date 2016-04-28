@@ -72,9 +72,9 @@ App.Views.AppView = Backbone.View.extend({
         var category_id = $('#modal select#category').val();
         var date = $('#modal input#date').val();
         var category_name = $('#modal select#category option:selected').text();
-        category_name = category_name.trim().replace(/(\r\n|\n|\r)/gm,"");
+        category_name = category_name.trim().replace(/(\r\n|\n|\r)/gm, "");
         var category = categories.where({name: category_name});
-        var color = _.where(colors,{id: category[0].get('color_id')});
+        var color = _.where(colors, {id: category[0].get('color_id')});
         if (event.currentTarget.id == 'addIncome') {
             var model = new App.Models.Entry({
                 className: 'income',
@@ -86,9 +86,10 @@ App.Views.AppView = Backbone.View.extend({
                 type: 1,
                 date: date
             });
+
         } else if (event.currentTarget.id == 'addExpense') {
             var model = new App.Models.Entry({
-                clasName: 'expense',
+                className: 'expense',
                 name: name,
                 value: value,
                 categoryColor: color[0]['color_name'],
@@ -98,11 +99,18 @@ App.Views.AppView = Backbone.View.extend({
                 date: date
             });
         }
-        entriesList.transactions.add(model);
-        expenseChartView = new App.Views.Chart({model:charts['expenseGraph']});
-        expenseChartView.model.trigger('change');
-        this.budget.html(entriesList.getBudget());
-        model.save();
+        var errors = model.preValidate({name: name, value: value});
+        if (!errors) {
+            $('#modal').closeModal();
+            $('#modal').remove();
+            entriesList.transactions.add(model);
+            expenseChartView = new App.Views.Chart({model: charts['expenseGraph']});
+            expenseChartView.model.trigger('change');
+            this.budget.html(entriesList.getBudget());
+            model.save();
+        }else {
+            
+        }
     },
     getCategoriesColors: function () {
         var colors = null;
@@ -131,7 +139,7 @@ App.Views.AppView = Backbone.View.extend({
     makeExpensesByDayChart: function () {
         var expenseGraphModel = charts['expenseGraph'];
         var expenseGraphView = new App.Views.Chart({model: expenseGraphModel});
-        this.$el.find('#content #transactions').before(expenseGraphView.render());
+        this.$el.find('#content #transactions').before(expenseGraphView.render(700, 200));
         expenseGraphView.createLineGraph(expenseGraphModel);
     }
 });

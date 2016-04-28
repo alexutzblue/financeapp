@@ -88,3 +88,10 @@ a.button-collapse.top-nav {
     margin-right: 5px;
     width: 12px;
 }
+.canvas-wrapper {
+    position: relative;
+}
+.canvas-wrapper .legend {
+    display: inline-block;
+    position: absolute;
+}

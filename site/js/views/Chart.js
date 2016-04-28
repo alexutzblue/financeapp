@@ -13,8 +13,11 @@ App.Views.Chart = Backbone.View.extend({
         this.model.on('change', this.createLineGraph(this.model), this);
     },
     template: _.template($('#graph-template').html()),
-    render: function () {
+    render: function (width,height) {
         var attributes = this.model.toJSON();
+        attributes['width'] = width;
+        attributes['height'] = height;
+        console.log(attributes);
         this.$el.html(this.template(attributes));
         return this.$el.html();
     },
