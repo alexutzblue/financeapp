@@ -99,8 +99,8 @@ App.Views.AppView = Backbone.View.extend({
                 date: date
             });
         }
-        var errors = model.preValidate({name: name, value: value});
-        if (!errors) {
+        var view = new App.Views.Entry({model: model}); // for binding the validation
+        if(model.isValid()) {
             $('#modal').closeModal();
             $('#modal').remove();
             entriesList.transactions.add(model);
@@ -108,8 +108,6 @@ App.Views.AppView = Backbone.View.extend({
             expenseChartView.model.trigger('change');
             this.budget.html(entriesList.getBudget());
             model.save();
-        }else {
-            
         }
     },
     getCategoriesColors: function () {

@@ -95,3 +95,6 @@ a.button-collapse.top-nav {
     display: inline-block;
     position: absolute;
 }
+.modal .modal-content {
+    overflow-x: hidden;
+}

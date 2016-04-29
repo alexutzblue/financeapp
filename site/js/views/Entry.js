@@ -1,10 +1,22 @@
 var App = App || {
-    Models: {},
-    Views: {},
-    Router: {},
-    Collections: {}
-};
+        Models: {},
+        Views: {},
+        Router: {},
+        Collections: {}
+    };
 
+
+_.extend(Backbone.Validation.callbacks, {
+    valid: function (view, attr, selector) {
+        console.log('valid');
+    },
+    invalid: function (view, attr, error, selector) {
+        var input = $('.modal #' + attr);
+        var group = input.parent();
+        group.find('label').attr('data-error', error);
+        input.addClass('invalid');
+    }
+});
 // BASIC ENTRY VIEW
 App.Views.Entry = Backbone.View.extend({
     tagName: "tr",
@@ -15,10 +27,14 @@ App.Views.Entry = Backbone.View.extend({
     },
     template: _.template($('#entry-template').html()),
     initialize: function () {
+        _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
+        Backbone.Validation.bind(this, {
+            attributes: ['name', 'value']
+        });
         this.model.on('hide', this.remove, this);
         this.model.on("change", this.render, this);
-        $('#delete-modal #yesBtn').on("click",function(){
-            $(this).data('clicked',true);
+        $('#delete-modal #yesBtn').on("click", function () {
+            $(this).data('clicked', true);
         });
     },
     render: function (event) {
@@ -29,15 +45,15 @@ App.Views.Entry = Backbone.View.extend({
     remove: function () {
         var _this = this;
         $('#delete-modal').openModal({
-            complete: function(){
-                if($('#delete-modal #yesBtn').data('clicked')) {
+            complete: function () {
+                if ($('#delete-modal #yesBtn').data('clicked')) {
                     _this.model.destroy();
-                    Materialize.toast("Entry has been deleted!",2000);
+                    Materialize.toast("Entry has been deleted!", 2000);
                     _this.$el.remove();
-                    expenseChartView = new App.Views.Chart({model:charts['expenseGraph']});
+                    expenseChartView = new App.Views.Chart({model: charts['expenseGraph']});
                     expenseChartView.model.trigger('change');
                 }
-                $('#delete-modal #yesBtn').data('clicked',false);
+                $('#delete-modal #yesBtn').data('clicked', false);
             }
         });
     },
@@ -56,7 +72,7 @@ App.Views.Entry = Backbone.View.extend({
         $('select#category').val(this.model.get('category_id'));
         $('input#date').val(this.model.get('date'));
         $('#modal').openModal({
-            complete: function(){
+            complete: function () {
                 $('#modal').remove();
             }
         });
@@ -73,14 +89,26 @@ App.Views.Entry = Backbone.View.extend({
         var value = $('input#value').val();
         var category_id = $('select#category').val();
         var category_name = $('select#category option:selected').text();
-        category_name = category_name.trim().replace(/(\r\n|\n|\r)/gm,"");
+        category_name = category_name.trim().replace(/(\r\n|\n|\r)/gm, "");
         var category = categories.where({name: category_name});
-        var color = _.where(colors,{id: category[0].get('color_id')});
+        var color = _.where(colors, {id: category[0].get('color_id')});
         var date = $('input#date').val();
-        console.log(event.data.model.preValidate({name: name, value: value}));
-        event.data.model.set({name: name, value: value, category_id: category_id, categoryColor: color[0]['color_name'], category: category_name, date: date},{wait:true});
-        event.data.model.save();
-        expenseChartView = new App.Views.Chart({model:charts['expenseGraph']});
-        expenseChartView.model.trigger('change');
+            event.data.model.set({
+                name: name,
+                value: value,
+                category_id: category_id,
+                categoryColor: color[0]['color_name'],
+                category: category_name,
+                date: date
+            }, {wait: true, silent: true});
+        if (event.data.model.isValid()) {
+            event.data.model.trigger('change');
+            $('#modal').closeModal();
+            $('#modal').remove();
+            event.data.model.save();
+            expenseChartView = new App.Views.Chart({model: charts['expenseGraph']});
+            expenseChartView.model.trigger('change');
+        }
+
     }
 });

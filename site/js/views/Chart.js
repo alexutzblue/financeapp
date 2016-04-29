@@ -17,7 +17,6 @@ App.Views.Chart = Backbone.View.extend({
         var attributes = this.model.toJSON();
         attributes['width'] = width;
         attributes['height'] = height;
-        console.log(attributes);
         this.$el.html(this.template(attributes));
         return this.$el.html();
     },

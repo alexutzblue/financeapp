@@ -9,18 +9,7 @@ App = App || {
 App.Views.EntriesList = Backbone.View.extend({
     initialize: function () {
         this.budget = 0;
-        _.extend(Backbone.Model.prototype, Backbone.Validation.mixin);
         this.transactions = new App.Collections.Transactions();
-        Backbone.Validation.bind(this, {
-            collection: this.transactions,
-            valid: function(view, attr, selector){
-                console.log('valid');
-            },
-            invalid: function(view, attr, error, selector){
-                console.log(view);
-                console.log(attr);
-            }
-        });
         this.transactions.on("add", this.addOne, this);
         this.transactions.on("destroy", this.getBudget, this);
     },

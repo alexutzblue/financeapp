@@ -109,7 +109,7 @@
 </script>
 
 <script type="text/template" id="modal-template">
-    <div id="modal" class='modal col m4 l4 center-align'>
+    <div id="modal" class='modal modal-fixed-footer col m4 l4'>
         <div class="modal-content">
             <% if(type=="edit") { %>
             <h4>Edit</h4>
@@ -118,14 +118,14 @@
             <% } %>
             <div class="row">
                 <div class="input-field col s12 m12">
-                    <input type="text" placeholder="default entry" name="name" id="name"/>
+                    <input type="text" class="validate" placeholder="default entry" name="name" id="name"/>
                     <label class="active" for="name">Name:</label>
                 </div>
             </div>
 
             <div class="row">
                 <div class="input-field col s12 m12">
-                    <input type="text" placeholder="default entry" name="value" id="value"/>
+                    <input type="text"  class="validate" placeholder="default entry" name="value" id="value"/>
                     <label class="active" for="value">Value:</label>
                 </div>
             </div>
@@ -139,7 +139,7 @@
                         </option>
                         <% } %>
                     </select>
-                    <label class="active" for="category">Category:</label>
+                    <label for="category">Category:</label>
                 </div>
             </div>
 
