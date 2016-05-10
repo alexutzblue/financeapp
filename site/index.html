@@ -5,8 +5,8 @@
     <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <!--Import materialize.css-->
     <link rel="stylesheet" href="node_modules/materialize-css/dist/css/materialize.css">
+    <link rel="stylesheet" href="node_modules/materialize-css/extras/noUiSlider/nouislider.css">
     <link href="css/main.css" type="text/css" rel="stylesheet">
-
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
@@ -28,13 +28,13 @@
         <li><a href="/" class="bold">Financial app</a></li>
         <div class="divider"></div>
         <li><a href="/" class="waves-effect">Dashboard</a></li>
-        <li><a href="#" class="waves-effect collapsible-header">Transactions</a>
+        <li><a href="javascript:void(0);" class="waves-effect collapsible-header">Transactions</a>
             <ul class="collapsible-body">
-                <li><a href="/incomes">Incomes</a></li>
-                <li><a href="/expenses">Expenses</a></li>
+                <li><a href="/incomes/1">Incomes</a></li>
+                <li><a href="/expenses/1">Expenses</a></li>
             </ul>
         </li>
-        <li><a href="/" class="waves-effect collapsible-header">Stats</a>
+        <li><a href="/entries" class="waves-effect collapsible-header">Stats</a>
             <ul class="collapsible-body">
                 <li><a href="/stats/incomes">Incomes</a></li>
                 <li><a href="/stats/expenses">Expenses</a></li>
@@ -79,14 +79,20 @@
     </div>
     <div class="modal-footer">
         <a href="#" class="modal-action modal-close waves-effect waves-red btn-flat">No</a>
-        <a id="yesBtn" href="#" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a>
+        <a id="yesBtn" href="javascript:void(0);" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a>
     </div>
 </div>
 
 
 <script type="text/template" id="entry-template">
     <td id="name"><%= name %></td>
-    <td id="value"><%= value %></td>
+    <td class="<%= className %>" id="value"><%= value %> RON
+    <% if (className == 'income') { %>
+        <i class="material-icons">arrow_drop_up</i>
+    <% } else { %>
+        <i class="material-icons">arrow_drop_down</i>
+    <% } %>
+    </td>
     <td>
         <span class="task-cat <%=categoryColor %>" id="category">
             <a href="/category/<%= category %>"><%=category %></a>
@@ -94,17 +100,16 @@
     </td>
     <td id="date"><%= date %></td>
     <td>
-        <a href="#" class=" btn-flat waves-effect">
-            <span class="badge tooltipped" data-position="top" data-tooltip="Delete" data-delay="50">
-                <i id="delete" class="material-icons" data-type="<%= type %>">close</i>
-            </span>
-        </a>
-        <a href="#" class=" btn-flat waves-effect">
+        <a id="edit" href="javascript:void(0);" class=" btn-flat waves-effect">
             <span class="badge tooltipped" data-position="top" data-tooltip="Edit" data-delay="50">
                 <i id="edit" class="material-icons right">edit</i>
             </span>
         </a>
-
+        <a id="delete" href="javascript:void(0);" class=" btn-flat waves-effect">
+            <span class="badge tooltipped" data-position="top" data-tooltip="Delete" data-delay="50">
+                <i id="delete" class="material-icons" data-type="<%= type %>">close</i>
+            </span>
+        </a>
     </td>
 </script>
 
@@ -125,7 +130,7 @@
 
             <div class="row">
                 <div class="input-field col s12 m12">
-                    <input type="text"  class="validate" placeholder="default entry" name="value" id="value"/>
+                    <input type="text" class="validate" placeholder="default entry" name="value" id="value"/>
                     <label class="active" for="value">Value:</label>
                 </div>
             </div>
@@ -212,14 +217,32 @@
 <script type="text/template" id="stats-template">
     <div class="row">
         <div class="col s12 m10 l8">
-            <%= content %>
+            <div class="card">
+                <div class="card-content">
+                <div class="card-title">
+                    <h4 class="card-title">Choose the time period for the stats:</h4>
+                </div>
+                    <h7>Start date:</h7>
+                    <input type="date" id="start-date"/>
+                    <h7>End date:</h7>
+                    <input type="date" id="end-date"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col s12 m12 l8">
+            <%= expensesPerMonth  %>
+        </div>
+        <div class="col s12 m12 l4">
+            <%= expensesPerCategory %>
         </div>
     </div>
 </script>
 
 <script type="text/template" id="dashboard-template">
     <div class="row">
-        <div class="col s12 m8 l8">
+        <div class="col s12 m12 l8">
             <div id="transactions" class="card">
                 <div class="card-content">
                     <div class="card-title"><span id="table-title" class="card-title"></span></div>
@@ -233,13 +256,47 @@
                             <th data-field="actions">Actions</th>
                         </tr>
                         </thead>
-                        <tbody></tbody>
+                        <tbody>
+                        <% var i = 0; %>
+                        <% if(context == 'dashboard') { %>
+
+                        <% }else if(context == 'incomes' || context == 'expenses') { %>
+                            <% var pages = Math.floor(totalEntries / 10); %>
+                            <% if(totalEntries % 10 && totalEntries > 9) { pages++ } %>
+                            <tr>
+                                <td colspan="5" class="center">
+                                    <ul class="pagination">
+                                        <% if(!pages) { pages = 1; } %>
+                                        <% if(activePageNumber == 1) { %>
+                                            <li class="disabled"><a href="<%= context %>/1"><i class="material-icons">chevron_left</i></a></li>
+                                        <% }else { %>
+                                            <li class="waves-effect"><a href="<%= context %>/<%= parseInt(activePageNumber) - 1%>"><i class="material-icons">chevron_left</i></a></li>
+                                        <% } %>
+                                        <% for(i = 1; i <= pages; i++) { %>
+                                            <% if(activePageNumber == i) { %>
+                                                <li class="active"><a href="/<%= context %>/<%= i %>"><%= i %></a></li>
+                                            <% }else { %>
+                                                <li class="waves-effect"><a href="/<%= context %>/<%= i %>"><%= i %></a></li>
+                                            <% } %>
+                                        <% } %>
+                                        <% if(activePageNumber == pages) { %>
+                                            <li class="disabled"><a href="/<%= context %>/<%= activePageNumber %>"><i class="material-icons">chevron_right</i></a></li>
+                                        <% }else { %>
+                                            <li class="waves-effect"><a href="/<%= context %>/<%= parseInt(activePageNumber) + 1 %>"><i class="material-icons">chevron_right</i></a></li>
+                                        <% } %>
+                                    </ul>
+                                </td>
+                            </tr>
+                        <% } %>
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 </script>
+
+
 
 <!-- ========= -->
 <!-- Libraries -->
@@ -249,12 +306,14 @@
 <script src="node_modules/backbone/node_modules/underscore/underscore.js" type="text/javascript"></script>
 <script src="node_modules/backbone/backbone.js" type="text/javascript"></script>
 <script src="node_modules/materialize-css/dist/js/materialize.js" type="text/javascript"></script>
+<script src="node_modules/materialize-css/extras/noUiSlider/nouislider.min.js" type="text/javascript"></script>
 <script src="node_modules/backbone-validation/dist/backbone-validation.js" type="text/javascript"></script>
 <script src="node_modules/chart.js/Chart.min.js" type="text/javascript"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js" type="text/javascript"></script>
 
 <script src="js/vendors/custom-materialize.js"></script>
+
 
 
 <!-- =============== -->

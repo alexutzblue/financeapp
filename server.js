@@ -35,6 +35,7 @@ app.get('/api', function (request, response) {
     response.send('Library API is running');
 });
 
+
 app.get('/api/transactions', function (request, response) {
     connection.query('SELECT tr.id, tr.name, tr.value, tr.type, tr.category_id, tr.date, cat.name as category, col.color_name as categoryColor ' +
         'FROM transactions as tr ' +

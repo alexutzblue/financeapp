@@ -20,10 +20,46 @@ App.Views.Chart = Backbone.View.extend({
         this.$el.html(this.template(attributes));
         return this.$el.html();
     },
-    statsTemplateWrapper: function(content) {
+    createExpensesPage: function(content) {
+        var date = true;
+        var statsTemplate = _.template($('#stats-template').html());
+        appView.$el.find('#content').html('');
+        appView.$el.find('#content').append(statsTemplate({expensesPerMonth: content['expenses-per-month'], expensesPerCategory: content['expenses-per-category']}));
+        $('#start-date').pickadate({
+            onSet: function() {
+                date = this.get('select');
+                picker.set('enable',true);
+                picker.set('disable',
+                    [
+                        { from : [2016,1,1], to: [date.year, date.month, date.date]}
+                    ]
+                );
+            }
+        });
+        var input = $('#end-date').pickadate();
+        var picker = input.pickadate('picker');
+        this.createExpensePieChart(charts['expenses']);
+        this.createExpensesLineChart(charts['expenses-per-month']);
+    },
+    createIncomesPage: function(content) {
+        var date = true;
         var statsTemplate = _.template($('#stats-template').html());
         appView.$el.find('#content').html('');
         appView.$el.find('#content').append(statsTemplate({content: content}));
+        $('#start-date').pickadate({
+            onSet: function() {
+                date = this.get('select');
+                picker.set('enable',true);
+                picker.set('disable',
+                    [
+                        { from : [2016,1,1], to: [date.year, date.month, date.date]}
+                    ]
+                );
+            }
+        });
+        var input = $('#end-date').pickadate();
+        var picker = input.pickadate('picker');
+        this.createIncomePieChart(charts['incomes']);
     },
     createLineGraph: function (model) {
         var canvasId = model.get('canvasId');
@@ -71,7 +107,10 @@ App.Views.Chart = Backbone.View.extend({
                 data['datasets'][0]['data'][i] = expensesPerDay[day];
                 i++;
             }
-            expensesLineChart = new Chart(lineCtx).Line(data);
+            var options = {
+                responsive: true
+            };
+            expensesLineChart = new Chart(lineCtx).Line(data,options);
         }
     },
     createIncomePieChart: function (model) {
@@ -83,7 +122,8 @@ App.Views.Chart = Backbone.View.extend({
                 if (!incomeCategories.hasOwnProperty(category)) {
                     incomeCategories[category] = {};
                     incomeCategories[category]['value'] = 0;
-                    incomeCategories[category]['color'] = model.get('categoryColor');
+                    var color = _.find(colors,{color_name: model.get('categoryColor')});
+                    incomeCategories[category]['color'] = '#' + color['color_code'];
                     incomeCategories[category]['value'] += parseInt(value);
                 } else {
                     incomeCategories[category]['value'] += parseInt(value);
@@ -100,8 +140,13 @@ App.Views.Chart = Backbone.View.extend({
             };
             i++;
         });
-
-        var incomeChart = new Chart(incomeCtx).Doughnut(incomeData);
+        var options = {
+            responsive: true,
+            legend: {
+                display: true
+            }
+        };
+        var incomeChart = new Chart(incomeCtx).Doughnut(incomeData,options);
         $('.' + model.get('legendClass')).html(incomeChart.generateLegend());
 
     },
@@ -114,7 +159,8 @@ App.Views.Chart = Backbone.View.extend({
                 if (!expenseCategories.hasOwnProperty(category)) {
                     expenseCategories[category] = {};
                     expenseCategories[category]['value'] = 0;
-                    expenseCategories[category]['color'] = model.get('categoryColor');
+                    var color = _.find(colors,{color_name: model.get('categoryColor')});
+                    expenseCategories[category]['color'] = '#' + color['color_code'];
                     expenseCategories[category]['value'] += parseInt(value);
                 } else {
                     expenseCategories[category]['value'] += parseInt(value);
@@ -130,8 +176,61 @@ App.Views.Chart = Backbone.View.extend({
             };
             i++;
         });
-
-        expenseChart = new Chart(expenseCtx).Pie(expenseData);
+        var options = {
+            responsive: true,
+            maintainAspectRatio: true
+        };
+        expenseChart = new Chart(expenseCtx).Doughnut(expenseData,options);
         $('.' + model.get('legendClass')).html(expenseChart.generateLegend());
+    },
+    createExpensesLineChart: function(model) {
+        var expensesPerMonthData, expensesPerMonthCtx, expensesPerMonthChart, i;
+        var dataPerMonth = {
+            "January": 0,
+            "February": 0,
+            "March": 0,
+            "April": 0,
+            "May": 0,
+            "June": 0,
+            "July": 0,
+            "August": 0,
+            "September": 0,
+            "October": 0,
+            "November": 0,
+            "December": 0
+        }
+        expensesPerMonthData = {
+            labels: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+            datasets: [
+                {
+                    label: "Expenses per month",
+                    fillColor: "rgba(220,220,220,0.2)",
+                    strokeColor: "rgba(220,220,220,1)",
+                    pointColor: "rgba(220,220,220,1)",
+                    pointStrokeColor: "#fff",
+                    pointHighlightFill: "#fff",
+                    pointHighlightStroke: "rgba(220,220,220,1)",
+                    data: [],
+                }
+            ]
+        };
+        entriesList.transactions.each(function(model) {
+            var date = model.get('date');
+            if(date) {
+                var month = moment(date,"D-MMMM-YYYY").format('MMMM');
+                dataPerMonth[month] += parseInt(model.get('value'));
+            }
+        });
+        i = 0;
+        for(var month in dataPerMonth) {
+            expensesPerMonthData['datasets'][0]['data'][i] = dataPerMonth[month];
+            i++;
+        }
+        var options = {
+            responsive: true,
+            maintainAspectRatio: false
+        };
+        expensesPerMonthCtx = $('#' + model.get('canvasId')).get(0).getContext('2d');
+        expensesPerMonthChart = new Chart(expensesPerMonthCtx).Line(expensesPerMonthData,options);
     }
 });

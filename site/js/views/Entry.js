@@ -8,7 +8,7 @@ var App = App || {
 
 _.extend(Backbone.Validation.callbacks, {
     valid: function (view, attr, selector) {
-        console.log('valid');
+
     },
     invalid: function (view, attr, error, selector) {
         var input = $('.modal #' + attr);
@@ -88,7 +88,7 @@ App.Views.Entry = Backbone.View.extend({
         var name = $('input#name').val();
         var value = $('input#value').val();
         var category_id = $('select#category').val();
-        var category_name = $('select#category option:selected').text();
+        var category_name = $('select#category option:selected').first().text();
         category_name = category_name.trim().replace(/(\r\n|\n|\r)/gm, "");
         var category = categories.where({name: category_name});
         var color = _.where(colors, {id: category[0].get('color_id')});

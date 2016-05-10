@@ -49,6 +49,11 @@ header, main, footer {
         width: 80%;
     }
 }
+@media only screen and (max-width: 992px) {
+    .page-title {
+        padding-left:100px;
+    }
+}
 .container {
     width: 85%;
 }
@@ -97,4 +102,11 @@ a.button-collapse.top-nav {
 }
 .modal .modal-content {
     overflow-x: hidden;
+}
+
+#value.income {
+    color: green;
+}
+#value.expense {
+    color: red;
 }
