@@ -15,6 +15,7 @@ var router = new (App.Router.AppRouter = Backbone.Router.extend({
         "stats/incomes": "showIncomesStats",
         "stats/expenses": "showExpensesStats",
         "category/:category": "showCategory",
+        "login": "login",
         "": "index"
     },
     initialize: function () {
@@ -56,6 +57,9 @@ var router = new (App.Router.AppRouter = Backbone.Router.extend({
             appView.makeExpensesByDayChart();
         }
         $('.tooltipped').tooltip({delay: 50});
+    },
+    login: function() {
+        appView.$el.find('#content').html('HTML');
     },
     getIncomes: function (number) {
         if (!entriesList.transactions.length) {

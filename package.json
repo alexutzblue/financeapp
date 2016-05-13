@@ -7,6 +7,10 @@
         "path": "~0.4.9",
         "mongoose": "~3.5.5",
         "body-parser": "~1.9.1",
-	    "mysql": "~2.5.4"
+        "express-session": "1.13",
+	    "mysql": "~2.5.4",
+        "ejs": "2.4",
+        "password-hash": "1.2.2",
+        "connect-flash": "0.1.1"
     }
 }
